@@ -107,13 +107,14 @@ EXTRA_CRM_COLUMNS = [
     "Assigned To",
 ]
 
+# (crm_column, output_column, required)
 CRM_IMPORT_COLUMNS = [
-    ("Enrolled Debt", "Enrolled Debt"),
-    ("Last Credit Pulled Date", "Last Credit Pulled Date"),
-    ("Cordoba Enrolled Date", "Cordoba Enrolled Date"),
-    ("Credit Score", "Credit Score"),
-    ("ID", "AMOD"),
-    ("Assigned To", "Assigned To"),
+    ("Enrolled Debt", "Enrolled Debt", True),
+    ("Last Credit Pulled Date", "Last Credit Pulled Date", True),
+    ("Cordoba Enrolled Date", "Cordoba Enrolled Date", True),
+    ("Credit Score", "Credit Score", True),
+    ("ID", "AMOD", True),
+    ("Assigned To", "Assigned To", False),
 ]
 
 REMOVE_OUTPUT_COLUMNS = {
@@ -154,10 +155,13 @@ def read_crm_rows_by_phone(csv_path, home_phone_col, status_col):
         home_key = field_map.get(home_phone_col.strip().lower())
         status_key = field_map.get(status_col.strip().lower())
         extra_keys = {}
-        for crm_column, output_column in CRM_IMPORT_COLUMNS:
+        for crm_column, output_column, required in CRM_IMPORT_COLUMNS:
             key = field_map.get(crm_column.strip().lower())
             if not key:
-                raise ValueError(f'Could not find CRM column "{crm_column}". Found: {reader.fieldnames}')
+                if required:
+                    raise ValueError(f'Could not find CRM column "{crm_column}". Found: {reader.fieldnames}')
+                print(f'Warning: optional CRM column "{crm_column}" not found — "{output_column}" will be blank.', file=sys.stderr)
+                continue
             extra_keys[output_column] = key
 
         if not home_key:
@@ -272,7 +276,7 @@ def main():
     wb = load_ytel_workbook(ytel_path)
     ws = wb.active
 
-    crm_output_columns = [output_column for _, output_column in CRM_IMPORT_COLUMNS]
+    crm_output_columns = [output_column for _, output_column, _ in CRM_IMPORT_COLUMNS]
     output_column_names = ["CRM Status", *crm_output_columns, "Recording With CRM Status"]
     output_headers = {name.lower() for name in output_column_names}
     remove_duplicate_output_columns(ws, output_headers)
