@@ -104,6 +104,7 @@ EXTRA_CRM_COLUMNS = [
     "Last Credit Pulled Date",
     "Cordoba Enrolled Date",
     "Credit Score",
+    "Assigned To",
 ]
 
 CRM_IMPORT_COLUMNS = [
@@ -112,6 +113,7 @@ CRM_IMPORT_COLUMNS = [
     ("Cordoba Enrolled Date", "Cordoba Enrolled Date"),
     ("Credit Score", "Credit Score"),
     ("ID", "AMOD"),
+    ("Assigned To", "Assigned To"),
 ]
 
 REMOVE_OUTPUT_COLUMNS = {
