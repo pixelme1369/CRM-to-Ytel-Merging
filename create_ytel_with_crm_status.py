@@ -138,7 +138,6 @@ REMOVE_OUTPUT_COLUMNS = {
     "rank",
     "country_code",
     "province",
-    "state",
     "city",
     "address3",
     "address2",
