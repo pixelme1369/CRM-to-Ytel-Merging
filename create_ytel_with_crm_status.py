@@ -105,6 +105,7 @@ EXTRA_CRM_COLUMNS = [
     "Cordoba Enrolled Date",
     "Credit Score",
     "Assigned To",
+    "State",
 ]
 
 # (crm_column, output_column, required)
@@ -115,6 +116,7 @@ CRM_IMPORT_COLUMNS = [
     ("Credit Score", "Credit Score", True),
     ("ID", "AMOD", True),
     ("Assigned To", "Assigned To", False),
+    ("State", "State", False),
 ]
 
 REMOVE_OUTPUT_COLUMNS = {
