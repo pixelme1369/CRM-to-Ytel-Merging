@@ -105,6 +105,7 @@ EXTRA_CRM_COLUMNS = [
     "Cordoba Enrolled Date",
     "Credit Score",
     "Assigned To",
+    "CRM_State",
 ]
 
 # (crm_column, output_column, required)
@@ -115,6 +116,7 @@ CRM_IMPORT_COLUMNS = [
     ("Credit Score", "Credit Score", True),
     ("ID", "AMOD", True),
     ("Assigned To", "Assigned To", False),
+    ("State", "CRM_State", False),
 ]
 
 REMOVE_OUTPUT_COLUMNS = {
@@ -277,7 +279,7 @@ def main():
     ws = wb.active
 
     crm_output_columns = [output_column for _, output_column, _ in CRM_IMPORT_COLUMNS]
-    output_column_names = ["CRM Status", *crm_output_columns, "Recording With CRM Status"]
+    output_column_names = ["CRM Status", *crm_output_columns]
     output_headers = {name.lower() for name in output_column_names}
     remove_duplicate_output_columns(ws, output_headers)
 
@@ -294,10 +296,9 @@ def main():
             ws.cell(row=row_idx, column=col_idx).value = None
 
     matched = 0
-    changed = 0
 
     for row_idx in range(2, ws.max_row + 1):
-        recording_phone, recording_value = find_ytel_phone_and_recording(ws, row_idx, output_headers)
+        recording_phone, _ = find_ytel_phone_and_recording(ws, row_idx, output_headers)
 
         if not recording_phone:
             continue
@@ -309,15 +310,6 @@ def main():
         matched += 1
         for header in ["CRM Status", *crm_output_columns]:
             ws.cell(row=row_idx, column=output_cols[header]).value = crm_row.get(header, "")
-
-        if recording_value:
-            updated_recording = append_status_to_recording(recording_value, crm_row.get("CRM Status", ""))
-        else:
-            updated_recording = f"{recording_phone}-{crm_row.get('CRM Status', '')}".rstrip("-")
-        ws.cell(row=row_idx, column=output_cols["Recording With CRM Status"]).value = updated_recording
-
-        if recording_value and updated_recording != recording_value:
-            changed += 1
 
     remove_unwanted_output_columns(ws)
 
@@ -332,7 +324,6 @@ def main():
             "crm_phones_with_status": len(crm_by_phone),
             "ytel_rows": max(ws.max_row - 1, 0),
             "matched_ytel_rows": matched,
-            "recording_names_with_status_added": changed,
             "output": str(output_xlsx),
         }
     )
